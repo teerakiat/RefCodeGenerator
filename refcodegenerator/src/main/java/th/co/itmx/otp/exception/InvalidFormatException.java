@@ -1,4 +1,4 @@
-package th.co.itmx.util;
+package th.co.itmx.otp.exception;
 
 public class InvalidFormatException extends Exception {
     public InvalidFormatException(String invalidKeyErrorMessage) {

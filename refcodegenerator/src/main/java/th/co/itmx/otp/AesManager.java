@@ -1,4 +1,4 @@
-package th.co.itmx.util;
+package th.co.itmx.otp;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
@@ -6,13 +6,13 @@ import javax.crypto.spec.SecretKeySpec;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 
-public class AdvancedEncryptionStandard {
+class AesManager {
     private byte[] key;
 
     private static final String ALGORITHM = "AES";
     private static final String PADDING = ALGORITHM + "/CBC/PKCS5Padding";
 
-    public AdvancedEncryptionStandard(byte[] key) {
+    AesManager(byte[] key) {
         this.key = key;
     }
 
@@ -21,7 +21,7 @@ public class AdvancedEncryptionStandard {
      *
      * @param plainText The plain text to encrypt
      */
-    public byte[] encrypt(byte[] plainText) throws Exception {
+    byte[] encrypt(byte[] plainText) throws Exception {
         SecretKeySpec secretKey = new SecretKeySpec(key, ALGORITHM);
         Cipher cipher = Cipher.getInstance(PADDING);
 
@@ -44,7 +44,7 @@ public class AdvancedEncryptionStandard {
      *
      * @param cipherText The data to decrypt
      */
-    public byte[] decrypt(byte[] cipherText) throws Exception {
+    byte[] decrypt(byte[] cipherText) throws Exception {
         Cipher cipher = Cipher.getInstance(PADDING);
         int ivSize = cipher.getBlockSize();
 

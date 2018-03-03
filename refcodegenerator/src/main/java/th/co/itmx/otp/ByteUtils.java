@@ -1,4 +1,4 @@
-package th.co.itmx.util;
+package th.co.itmx.otp;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -12,16 +12,16 @@ public class ByteUtils {
         buffer.putLong(0, x);
         return buffer.array();
     }
-
-    public static long bytesToLong(byte[] bytes) {
-        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
-        if(bytes.length < 8){
-            buffer.put(new byte[] {0}, 0, 1);
-        }
-        buffer.put(bytes, 0, bytes.length);
-        buffer.flip();//need flip
-        return buffer.getLong();
-    }
+//
+//    public static long bytesToLong(byte[] bytes) {
+//        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+//        if(bytes.length < 8){
+//            buffer.put(new byte[] {0}, 0, 1);
+//        }
+//        buffer.put(bytes, 0, bytes.length);
+//        buffer.flip();//need flip
+//        return buffer.getLong();
+//    }
 
     public static int bytesToInt(byte[] bytes){
 //        ByteBuffer i_buffer = ByteBuffer.allocate(Integer.BYTES);
