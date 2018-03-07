@@ -1,3 +1,5 @@
-.idea/
-target/
-out/
+refcodegenerator/target/
+refcodegenerator/out/
+refcodegenerator/.idea/
+refcode-cli/.idea/
+refcode-cli/target/

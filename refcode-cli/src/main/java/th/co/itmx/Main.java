@@ -79,9 +79,10 @@ public class Main {
     }
 
     public static void main(String[] args) {
+        String commandList = "genkey, otp";
         Options options = new Options();
 
-        Option command = new Option("c", "command", true, "execution command, possible value : genkey, ref_code");
+        Option command = new Option("c", "command", true, "execution command, possible value : "+ commandList);
         command.setRequired(true);
         options.addOption(command);
 
@@ -114,8 +115,12 @@ public class Main {
 
                 byte[] encryptedSeed = Files.readAllBytes(Paths.get(keyFilePath));
                 byte[] seed = KeyManager.newInstance().decrypt(encryptedSeed);
+                System.out.println("Verifying reference code....");
                 VerifyRefCode(seed, Integer.parseInt(intervalValue));
 
+            }else{
+                System.out.println("Incorrect command code provide, possible command code are: "+commandList);
+                System.exit(1);
             }
         } catch (ParseException ex) {
             formatter.printHelp("mobile-security", options);
