@@ -1,5 +1,7 @@
 package th.co.itmx.otp;
 
+import org.apache.commons.lang3.StringUtils;
+import org.omg.CORBA.DynAnyPackage.Invalid;
 import th.co.itmx.otp.exception.InvalidFormatException;
 
 import javax.crypto.Mac;
@@ -8,6 +10,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 public class OTPManager {
 
@@ -60,36 +63,49 @@ public class OTPManager {
         return new long[]{current_epoch, next_epoch};
     }
 
-    public String generateRefCode(byte[] seed, int interval, String nationalId, String mobile) throws Exception {
-        if (interval <= 0) {
-            throw new InvalidFormatException("Expiry time must greater than 0");
+    public String generateRefCode(byte[] seed, String request_date, String nationalId, String mobile) throws Exception {
+        if(!Pattern.matches("^([0-9]{4})([0-9]{2})([0-9]{2})$", request_date)){
+            throw new InvalidFormatException("Invalid request_date format, must be in yyyyMMDD format ex. 20180621");
         }
-
-        long epoch_raw = Instant.now().toEpochMilli();
-
-        long current_epoch = (long) Math.floor(epoch_raw / interval);
-
-        return HOTP(nationalId + mobile + Long.toString(current_epoch), seed);
+        if(!Pattern.matches("^([0-9]{1})-([0-9]{4})-([0-9]{5})-([0-9]{2})-([0-9]{1})$", nationalId)){
+            throw new InvalidFormatException("Invalid Id format, correct format must be in x-xxxx-xxxxx-xx-x");
+        }
+        if(!Pattern.matches("^\\+[0-9]{11}$", mobile)){
+            throw new InvalidFormatException("Invalid mobile number exception, correct format must be +66857761709");
+        }
+        return HOTP(nationalId + mobile + request_date, seed);
     }
 
-    public void getPossibleRefCode(byte[] seed, int interval, String nationId, String mobile) throws Exception {
-
-        if (interval <= 0) {
-            throw new InvalidFormatException("Expiry time must greater than 0");
-        }
-
-        long[] epoch = getEpoch(interval * 1000);
-//        for (long anEpoch : epoch) {
-//            System.out.println(anEpoch);
+//    public String generateRefCode(byte[] seed, int interval, String nationalId, String mobile) throws Exception {
+//        if (interval <= 0) {
+//            throw new InvalidFormatException("Expiry time must greater than 0");
 //        }
-
-        List<String> otp = new ArrayList<>();
-        otp.add(HOTP(nationId + mobile + Long.toString(epoch[0]), seed));
-
-        if (epoch[1] != 0) {
-            otp.add(HOTP(nationId + mobile + Long.toString(epoch[1]), seed));
-        }
-
-        otp.forEach(System.out::println);
-    }
+//
+//        long epoch_raw = Instant.now().toEpochMilli();
+//
+//        long current_epoch = (long) Math.floor(epoch_raw / interval);
+//
+//        return HOTP(nationalId + mobile + Long.toString(current_epoch), seed);
+//    }
+//
+//    public void getPossibleRefCode(byte[] seed, int interval, String nationId, String mobile) throws Exception {
+//
+//        if (interval <= 0) {
+//            throw new InvalidFormatException("Expiry time must greater than 0");
+//        }
+//
+//        long[] epoch = getEpoch(interval * 1000);
+////        for (long anEpoch : epoch) {
+////            System.out.println(anEpoch);
+////        }
+//
+//        List<String> otp = new ArrayList<>();
+//        otp.add(HOTP(nationId + mobile + Long.toString(epoch[0]), seed));
+//
+//        if (epoch[1] != 0) {
+//            otp.add(HOTP(nationId + mobile + Long.toString(epoch[1]), seed));
+//        }
+//
+//        otp.forEach(System.out::println);
+//    }
 }

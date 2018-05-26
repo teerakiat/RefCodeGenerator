@@ -7,7 +7,7 @@ public class Util {
     }
 
 
-    private static String byteArrayToHexString(byte[] byteArray){
+    public static String byteArrayToHexString(byte[] byteArray){
         String hexString = "";
 
         for(int i = 0; i < byteArray.length; i++){
@@ -16,6 +16,14 @@ public class Util {
         }
 
         return hexString;
+    }
+
+    public static byte[] xorWithKey(byte[] a, byte[] key) {
+        byte[] out = new byte[a.length];
+        for (int i = 0; i < a.length; i++) {
+            out[i] = (byte) (a[i] ^ key[i%key.length]);
+        }
+        return out;
     }
 
 }

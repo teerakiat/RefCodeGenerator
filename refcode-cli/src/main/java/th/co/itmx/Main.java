@@ -7,9 +7,9 @@ import th.co.itmx.otp.OTPManager;
 import th.co.itmx.otp.exception.InvalidFormatException;
 import th.co.itmx.util.Util;
 
+import javax.xml.bind.DatatypeConverter;
 import java.io.Console;
 import java.io.FileOutputStream;
-import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -17,12 +17,13 @@ import java.nio.file.Paths;
 public class Main {
 
 
-    //nodejs: Buffer.from('74656572616b696174636869', 'utf8').toString('hex');
+    //nodejs: Buffer.from('74656572616b696174636869afabacad', 'utf8').toString('hex');
+    // 5123456789abcdef1234567890abcdef
     //java: Integer.toHexString(Integer.parseInt(hex));
     private static String inputKey(String questionText) throws Exception{
         char secretKey[];
         String confirm="n";
-        int minimumKeyLength = 24; //having at least 24 Hexadecimal
+        int minimumKeyLength = 32; //having at least 32 Hexadecimal
         do {
             System.out.println("Please enter your key in Hexadecimal, supported char [0-9][A-F][a-f], input at least "+minimumKeyLength+" chars");
             Console console = System.console();
@@ -50,19 +51,19 @@ public class Main {
             }
 
             //create input bytes, full key compose of key of two components
-            // 1: itmx key, have at least 24 hexadecimal chars
-            // 2: telco key, have at least 24 hexadecimal chars
+            // 1: itmx key
+            // 2: telco key
             String itmxSecretKey = inputKey("Enter ITMX Secret Key: ");
             String telcoSecretKey = inputKey("Enter Telco Secret Key: ");
 
             //combine two key and convert to byte array
-            String fullKey = itmxSecretKey + telcoSecretKey;
-            byte[] byteKey = new BigInteger(fullKey,16).toByteArray();
-//            System.out.println(byteArrayToHexString(byteKey));
+            byte[] fullKey = Util.xorWithKey(DatatypeConverter.parseHexBinary(itmxSecretKey), DatatypeConverter.parseHexBinary(telcoSecretKey));
+
+            System.out.println("full key: "+ Util.byteArrayToHexString(fullKey));
 
             //encryption
             KeyManager manager = new KeyManager();
-            byte[] encryptedKey = manager.encrypt(byteKey);
+            byte[] encryptedKey = manager.encrypt(fullKey);
 //            System.out.println("encrypt key: "+ byteArrayToHexString(encryptedKey));
             //write encryption to file
             try (FileOutputStream fos = new FileOutputStream(outputFile)) {
@@ -87,10 +88,10 @@ public class Main {
         options.addOption(command);
 
         Option keyfile = new Option("f", "keyfile", true, "keyfile output in case of genkey, keyfile as input in case of otp");
-        keyfile.setRequired(false);
+        keyfile.setRequired(true);
         options.addOption(keyfile);
 
-        Option interval = new Option("t", "time", true, "time in seconds of the otp to be expire");
+        Option interval = new Option("t", "request_date", true, "date to be test in format yyyyMMdd : 20180621");
         interval.setRequired(false);
         options.addOption(interval);
 
@@ -108,15 +109,15 @@ public class Main {
                 generateKey(outputFile);
             } else if (commandValue.equalsIgnoreCase("otp")) {
                 String keyFilePath = cmd.getOptionValue("keyfile");
-                String intervalValue = cmd.getOptionValue("time");
+                String intervalValue = cmd.getOptionValue("request_date");
                 if (intervalValue == null) {
-                    throw new InvalidFormatException("Expiry time is mandatory");
+                    throw new InvalidFormatException("request_date is mandatory");
                 }
 
                 byte[] encryptedSeed = Files.readAllBytes(Paths.get(keyFilePath));
                 byte[] seed = KeyManager.newInstance().decrypt(encryptedSeed);
                 System.out.println("Verifying reference code....");
-                VerifyRefCode(seed, Integer.parseInt(intervalValue));
+                generateRefCode(seed, intervalValue);
 
             }else{
                 System.out.println("Incorrect command code provide, possible command code are: "+commandList);
@@ -132,7 +133,7 @@ public class Main {
         }
     }
 
-    private static void VerifyRefCode(byte[] seed, int interval) throws Exception {
+    private static void generateRefCode(byte[] seed, String interval) throws Exception {
 
         Console console = System.console();
 
@@ -140,6 +141,7 @@ public class Main {
         String mobile = console.readLine("Enter mobile number:");
 
         OTPManager manager = OTPManager.newInstance();
-        manager.getPossibleRefCode(seed, interval, nationalId, mobile);
+        String otp = manager.generateRefCode(seed, interval, nationalId, mobile);
+        System.out.println(otp);
     }
 }
