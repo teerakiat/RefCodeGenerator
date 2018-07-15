@@ -73,14 +73,16 @@ public class Main {
             pubSpec = new X509EncodedKeySpec(pubKeyBytes);
             PublicKey telcoPub = kf.generatePublic(pubSpec);
 
-            byte[] shareKey = generateRandomKey();
+            //byte[] shareKey = generateRandomKey();
+            byte[]  shareKey = "hello world".getBytes();
+
             //encryption
             KeyManager manager = new KeyManager();
             byte[] itmxEncryptedKey = manager.encrypt(shareKey, itmxPub);
             byte[] telcoEncryptedKey = manager.encrypt(shareKey, telcoPub);
 
             //********** for testing only
-//            System.out.println("encrypt key: "+ byteArrayToHexString(shareKey));
+//            System.out.println("key: "+ byteArrayToHexString(shareKey));
 
             //create output folder if not exist
             new File(outputFolder).mkdir();
@@ -103,7 +105,7 @@ public class Main {
 //            byte[] priKeyBytes = Files.readAllBytes(new File("D:\\temp\\itmx_private_key.der").toPath());
 //            PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(priKeyBytes);
 //            PrivateKey pri = kf.generatePrivate(spec);
-//
+
 //            byte[] resultByte = manager.decrypt(itmxEncryptedKey, pri);
 //            System.out.println("result : " + byteArrayToHexString(resultByte));
         }catch (Exception ex){
